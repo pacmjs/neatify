@@ -1,9 +1,9 @@
 //! Core formatter functionality
 
+use crate::core::error::NeatifyError;
+use anyhow::Result;
 use std::fs;
 use std::path::Path;
-use anyhow::Result;
-use crate::core::error::NeatifyError;
 
 /// Statistics about formatting operations
 #[derive(Debug, Default, Clone)]
@@ -52,8 +52,9 @@ pub trait Formatter {
         if !file_path.exists() {
             return Err(NeatifyError::IoError(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
-                format!("File does not exist: {}", file_path.display())
-            )).into());
+                format!("File does not exist: {}", file_path.display()),
+            ))
+            .into());
         }
 
         // Check if file is supported

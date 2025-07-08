@@ -2,18 +2,18 @@
 
 pub mod javascript;
 
+use crate::core::error::NeatifyError;
 use crate::core::formatter::{Formatter, FormattingStats};
 use anyhow::Result;
 use std::path::Path;
-use crate::core::error::NeatifyError;
 
 /// Format a file with the appropriate formatter
 pub fn format_file<P: AsRef<Path>>(file_path: P, write: bool) -> Result<bool> {
     let file_path = file_path.as_ref();
-    
+
     // Get the appropriate formatter for the file
     let formatter = get_formatter_for_file(file_path);
-    
+
     match formatter {
         Some(formatter) => formatter.format_file(file_path, write),
         None => Err(NeatifyError::UnsupportedFile(file_path.display().to_string()).into()),
@@ -23,18 +23,19 @@ pub fn format_file<P: AsRef<Path>>(file_path: P, write: bool) -> Result<bool> {
 /// Format all supported files in a directory
 pub fn format_directory<P: AsRef<Path>>(dir_path: P, write: bool) -> Result<FormattingStats> {
     let dir_path = dir_path.as_ref();
-    
+
     // Check if the directory exists
     if !dir_path.exists() || !dir_path.is_dir() {
         return Err(NeatifyError::IoError(std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            format!("Directory does not exist: {}", dir_path.display())
-        )).into());
+            format!("Directory does not exist: {}", dir_path.display()),
+        ))
+        .into());
     }
-    
+
     let mut stats = FormattingStats::new();
     format_directory_recursive(dir_path, write, &mut stats)?;
-    
+
     Ok(stats)
 }
 
@@ -77,9 +78,12 @@ fn format_directory_recursive(
                     }
                     Err(e) => {
                         // Return error with proper error type
-                        return Err(NeatifyError::FormattingError(
-                            format!("Error formatting {}: {}", path.display(), e)
-                        ).into());
+                        return Err(NeatifyError::FormattingError(format!(
+                            "Error formatting {}: {}",
+                            path.display(),
+                            e
+                        ))
+                        .into());
                     }
                 }
             }
@@ -92,9 +96,8 @@ fn format_directory_recursive(
 /// Get the appropriate formatter for a file
 fn get_formatter_for_file(file_path: &Path) -> Option<Box<dyn Formatter>> {
     // Create instances of all available formatters
-    let formatters: Vec<Box<dyn Formatter>> = vec![
-        Box::new(javascript::JavaScriptFormatter::new()),
-    ];
+    let formatters: Vec<Box<dyn Formatter>> =
+        vec![Box::new(javascript::JavaScriptFormatter::new())];
 
     // Find the first formatter that supports this file
     for formatter in formatters {

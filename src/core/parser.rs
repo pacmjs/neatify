@@ -1,7 +1,7 @@
 //! Parser functionality for code formatting
 
-use crate::core::tokens::{Token, Tokenizer};
 use crate::core::error::NeatifyError;
+use crate::core::tokens::{Token, Tokenizer};
 use anyhow::Result;
 
 /// Parser for source code
@@ -14,21 +14,19 @@ impl<'a> Parser<'a> {
     pub fn new(tokenizer: &'a dyn Tokenizer) -> Self {
         Self { tokenizer }
     }
-    
+
     /// Parse source code into tokens
     pub fn parse(&self, content: &str) -> Vec<Token> {
         self.tokenizer.tokenize(content)
     }
-    
+
     /// Parse source code into tokens with error handling
     pub fn parse_with_error_handling(&self, content: &str) -> Result<Vec<Token>> {
-        match std::panic::catch_unwind(|| {
-            self.tokenizer.tokenize(content)
-        }) {
+        match std::panic::catch_unwind(|| self.tokenizer.tokenize(content)) {
             Ok(tokens) => Ok(tokens),
-            Err(_) => Err(NeatifyError::FormattingError(
-                "Error parsing source code".to_string()
-            ).into()),
+            Err(_) => {
+                Err(NeatifyError::FormattingError("Error parsing source code".to_string()).into())
+            }
         }
     }
 }

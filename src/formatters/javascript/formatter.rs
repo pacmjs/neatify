@@ -1,8 +1,8 @@
 //! JavaScript formatter implementation
 
-use crate::core::tokens::Token;
-use crate::core::parser;
 use super::tokenizer::JavaScriptTokenizer;
+use crate::core::parser;
+use crate::core::tokens::Token;
 
 /// Format JavaScript code
 pub(crate) fn format_javascript(content: &str) -> String {

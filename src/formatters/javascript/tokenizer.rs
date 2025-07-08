@@ -22,32 +22,67 @@ impl Tokenizer for JavaScriptTokenizer {
 pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
     let mut chars = content.chars().peekable();
-    
+
     let mut in_string = false;
     let mut string_delimiter = '"';
     let mut current_string = String::new();
-    
+
     let mut in_comment = false;
     let mut in_multiline_comment = false;
     let mut current_comment = String::new();
-    
+
     let mut in_identifier = false;
     let mut current_identifier = String::new();
-    
+
     let mut in_number = false;
     let mut current_number = String::new();
-    
+
     let mut in_operator = false;
     let mut current_operator = String::new();
-    
+
     let keywords = [
-        "var", "let", "const", "function", "return", "if", "else", "for", "while", "do",
-        "switch", "case", "default", "break", "continue", "try", "catch", "finally", "throw",
-        "new", "delete", "typeof", "instanceof", "in", "this", "super", "class", "extends",
-        "import", "export", "from", "as", "async", "await", "yield", "true", "false", "null",
-        "undefined", "void"
+        "var",
+        "let",
+        "const",
+        "function",
+        "return",
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "switch",
+        "case",
+        "default",
+        "break",
+        "continue",
+        "try",
+        "catch",
+        "finally",
+        "throw",
+        "new",
+        "delete",
+        "typeof",
+        "instanceof",
+        "in",
+        "this",
+        "super",
+        "class",
+        "extends",
+        "import",
+        "export",
+        "from",
+        "as",
+        "async",
+        "await",
+        "yield",
+        "true",
+        "false",
+        "null",
+        "undefined",
+        "void",
     ];
-    
+
     while let Some(c) = chars.next() {
         // Handle string literals
         if in_string {
@@ -60,7 +95,7 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
             }
             continue;
         }
-        
+
         // Handle comments
         if in_comment {
             if c == '\n' {
@@ -73,7 +108,7 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
             }
             continue;
         }
-        
+
         if in_multiline_comment {
             if c == '*' && chars.peek() == Some(&'/') {
                 chars.next(); // Consume the '/'
@@ -88,7 +123,7 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
             }
             continue;
         }
-        
+
         // Handle identifiers
         if in_identifier {
             if c.is_alphanumeric() || c == '_' || c == '$' {
@@ -101,18 +136,29 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
                     tokens.push(Token::Identifier(current_identifier.clone()));
                 }
                 current_identifier.clear();
-                
+
                 // Process the current character
-                process_char(c, &mut chars, &mut tokens, 
-                             &mut in_string, &mut string_delimiter, &mut current_string,
-                             &mut in_comment, &mut in_multiline_comment, &mut current_comment,
-                             &mut in_number, &mut current_number,
-                             &mut in_operator, &mut current_operator,
-                             &mut in_identifier, &mut current_identifier);
+                process_char(
+                    c,
+                    &mut chars,
+                    &mut tokens,
+                    &mut in_string,
+                    &mut string_delimiter,
+                    &mut current_string,
+                    &mut in_comment,
+                    &mut in_multiline_comment,
+                    &mut current_comment,
+                    &mut in_number,
+                    &mut current_number,
+                    &mut in_operator,
+                    &mut current_operator,
+                    &mut in_identifier,
+                    &mut current_identifier,
+                );
             }
             continue;
         }
-        
+
         // Handle numbers
         if in_number {
             if c.is_digit(10) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-' {
@@ -121,18 +167,29 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
                 in_number = false;
                 tokens.push(Token::NumberLiteral(current_number.clone()));
                 current_number.clear();
-                
+
                 // Process the current character
-                process_char(c, &mut chars, &mut tokens, 
-                             &mut in_string, &mut string_delimiter, &mut current_string,
-                             &mut in_comment, &mut in_multiline_comment, &mut current_comment,
-                             &mut in_number, &mut current_number,
-                             &mut in_operator, &mut current_operator,
-                             &mut in_identifier, &mut current_identifier);
+                process_char(
+                    c,
+                    &mut chars,
+                    &mut tokens,
+                    &mut in_string,
+                    &mut string_delimiter,
+                    &mut current_string,
+                    &mut in_comment,
+                    &mut in_multiline_comment,
+                    &mut current_comment,
+                    &mut in_number,
+                    &mut current_number,
+                    &mut in_operator,
+                    &mut current_operator,
+                    &mut in_identifier,
+                    &mut current_identifier,
+                );
             }
             continue;
         }
-        
+
         // Handle operators
         if in_operator {
             if is_operator_char(c) {
@@ -141,27 +198,49 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
                 in_operator = false;
                 tokens.push(Token::Operator(current_operator.clone()));
                 current_operator.clear();
-                
+
                 // Process the current character
-                process_char(c, &mut chars, &mut tokens, 
-                             &mut in_string, &mut string_delimiter, &mut current_string,
-                             &mut in_comment, &mut in_multiline_comment, &mut current_comment,
-                             &mut in_number, &mut current_number,
-                             &mut in_operator, &mut current_operator,
-                             &mut in_identifier, &mut current_identifier);
+                process_char(
+                    c,
+                    &mut chars,
+                    &mut tokens,
+                    &mut in_string,
+                    &mut string_delimiter,
+                    &mut current_string,
+                    &mut in_comment,
+                    &mut in_multiline_comment,
+                    &mut current_comment,
+                    &mut in_number,
+                    &mut current_number,
+                    &mut in_operator,
+                    &mut current_operator,
+                    &mut in_identifier,
+                    &mut current_identifier,
+                );
             }
             continue;
         }
-        
+
         // Start of new tokens
-        process_char(c, &mut chars, &mut tokens, 
-                     &mut in_string, &mut string_delimiter, &mut current_string,
-                     &mut in_comment, &mut in_multiline_comment, &mut current_comment,
-                     &mut in_number, &mut current_number,
-                     &mut in_operator, &mut current_operator,
-                     &mut in_identifier, &mut current_identifier);
+        process_char(
+            c,
+            &mut chars,
+            &mut tokens,
+            &mut in_string,
+            &mut string_delimiter,
+            &mut current_string,
+            &mut in_comment,
+            &mut in_multiline_comment,
+            &mut current_comment,
+            &mut in_number,
+            &mut current_number,
+            &mut in_operator,
+            &mut current_operator,
+            &mut in_identifier,
+            &mut current_identifier,
+        );
     }
-    
+
     // Handle any remaining tokens
     if in_identifier {
         if keywords.contains(&current_identifier.as_str()) {
@@ -170,15 +249,15 @@ pub(crate) fn tokenize_javascript(content: &str) -> Vec<Token> {
             tokens.push(Token::Identifier(current_identifier));
         }
     }
-    
+
     if in_number {
         tokens.push(Token::NumberLiteral(current_number));
     }
-    
+
     if in_operator {
         tokens.push(Token::Operator(current_operator));
     }
-    
+
     tokens
 }
 
@@ -218,11 +297,11 @@ fn process_char(
             } else {
                 tokens.push(Token::Dot);
             }
-        },
+        }
         '"' | '\'' => {
             *in_string = true;
             *string_delimiter = c;
-        },
+        }
         '/' => {
             if chars.peek() == Some(&'/') {
                 chars.next(); // Consume the second '/'
@@ -236,21 +315,21 @@ fn process_char(
             } else {
                 tokens.push(Token::Other(c));
             }
-        },
+        }
         '0'..='9' => {
             *in_number = true;
             current_number.push(c);
-        },
+        }
         'a'..='z' | 'A'..='Z' | '_' | '$' => {
             *in_identifier = true;
             current_identifier.push(c);
-        },
+        }
         ' ' | '\t' => {
             tokens.push(Token::Whitespace(c.to_string()));
-        },
+        }
         '\n' => {
             tokens.push(Token::Newline);
-        },
+        }
         _ => {
             if is_operator_char(c) {
                 *in_operator = true;
@@ -264,5 +343,8 @@ fn process_char(
 
 /// Check if a character is part of an operator
 fn is_operator_char(c: char) -> bool {
-    matches!(c, '+' | '-' | '*' | '/' | '%' | '=' | '!' | '<' | '>' | '&' | '|' | '^' | '~' | '?')
+    matches!(
+        c,
+        '+' | '-' | '*' | '/' | '%' | '=' | '!' | '<' | '>' | '&' | '|' | '^' | '~' | '?'
+    )
 }

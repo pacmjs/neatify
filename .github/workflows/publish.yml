@@ -1,0 +1,138 @@
+name: Publish to Crates.io
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v0.1.0, v1.0.0, etc.
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # First, run all tests to ensure the release is stable
+  test:
+    name: Test before publish
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Run tests
+      run: cargo test --verbose
+
+  # Cross-platform testing
+  test-cross-platform:
+    name: Cross-platform tests
+    needs: test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+
+  # Publish to crates.io
+  publish:
+    name: Publish to crates.io
+    needs: [test, test-cross-platform]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    # Verify the version in Cargo.toml matches the git tag
+    - name: Verify version matches tag
+      run: |
+        CARGO_VERSION=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[0].version')
+        GIT_TAG=${GITHUB_REF#refs/tags/v}
+        echo "Cargo version: $CARGO_VERSION"
+        echo "Git tag version: $GIT_TAG"
+        if [ "$CARGO_VERSION" != "$GIT_TAG" ]; then
+          echo "Version mismatch: Cargo.toml has $CARGO_VERSION but git tag is v$GIT_TAG"
+          exit 1
+        fi
+    
+    # Dry run first to catch any issues
+    - name: Cargo publish (dry run)
+      run: cargo publish --dry-run --token ${{ secrets.CRATES_KEY }}
+    
+    # Actually publish to crates.io
+    - name: Cargo publish
+      run: cargo publish --token ${{ secrets.CRATES_KEY }}
+
+  # Create GitHub release with changelog
+  create-release:
+    name: Create GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for changelog generation
+    
+    - name: Extract version from tag
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Extract changelog for this version
+      id: changelog
+      run: |
+        # Extract the changelog section for this version
+        VERSION=${{ steps.version.outputs.version }}
+        if [ -f "CHANGELOG.md" ]; then
+          # Try to extract changelog section between version headers
+          awk "/^## \[?$VERSION\]?|^## \[?v$VERSION\]?/{flag=1; next} /^## \[?[0-9]/{flag=0} flag" CHANGELOG.md > release_notes.txt
+          
+          # If no specific version section found, use a generic message
+          if [ ! -s release_notes.txt ]; then
+            echo "Release $VERSION" > release_notes.txt
+            echo "" >> release_notes.txt
+            echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> release_notes.txt
+          fi
+        else
+          echo "Release $VERSION" > release_notes.txt
+          echo "" >> release_notes.txt
+          echo "No changelog available." >> release_notes.txt
+        fi
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release v${{ steps.version.outputs.version }}
+        body_path: release_notes.txt
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, '-') }}  # Mark as prerelease if version contains '-' (e.g., v1.0.0-beta.1)
