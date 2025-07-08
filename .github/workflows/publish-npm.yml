@@ -53,4 +53,4 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_KEY }}
         run: |
           cd npm
-          npm publish
+          npm publish --access public --provenance
