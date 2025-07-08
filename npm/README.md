@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/nametag.png" alt="Neatify Nametag" width="450" height="300">
+<img src="https://github.com/pacmjs/neatify/blob/main/assets/nametag.png" alt="Neatify Nametag" width="450" height="300">
 
 <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
 
@@ -8,6 +8,7 @@
 [![License](https://img.shields.io/npm/l/neatify.svg)](LICENSE)
 
 A powerful, extensible code formatter library for multiple languages with a clean API interface. This is the Node.js/npm binding for the neatify Rust library.
+</div>
 </div>
 
 ## Features

@@ -44,3 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File and directory formatting API
 - Error handling
 - Documentation
+
+## [0.1.4] - 09-07-2025
+
+### Added
+- Fixed README style in npm package
