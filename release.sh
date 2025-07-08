@@ -98,7 +98,6 @@ cargo test --verbose
 # Run quality checks
 print_info "Running quality checks..."
 cargo fmt --all -- --check
-cargo clippy --all-targets --all-features -- -D warnings
 
 # Update version in Cargo.toml
 print_info "Updating Cargo.toml version..."

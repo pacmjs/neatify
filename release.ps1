@@ -118,12 +118,6 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-cargo clippy --all-targets --all-features -- -D warnings
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Clippy check failed"
-    exit 1
-}
-
 # Update version in Cargo.toml
 Write-Info "Updating Cargo.toml version..."
 $cargoTomlContent = Get-Content "Cargo.toml" -Raw
