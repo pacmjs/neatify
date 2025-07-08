@@ -135,29 +135,6 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# Build WebAssembly bindings
-Write-Info "Building WebAssembly bindings..."
-if (-not (Get-Command "wasm-pack" -ErrorAction SilentlyContinue)) {
-    Write-Info "Installing wasm-pack..."
-    cargo install wasm-pack
-}
-
-wasm-pack build --target nodejs --features wasm --out-dir npm/bin
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "WebAssembly build failed"
-    exit 1
-}
-
-# Build npm package
-Write-Info "Building npm package..."
-Set-Location npm
-npm run build
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "npm build failed"
-    exit 1
-}
-Set-Location ..
-
 # Update version in Cargo.toml [package] section
 Write-Info "Updating Cargo.toml package version..."
 $cargoTomlContent = Get-Content "Cargo.toml"
