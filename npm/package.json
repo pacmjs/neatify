@@ -1,0 +1,66 @@
+{
+  "name": "neatify",
+  "version": "0.1.2",
+  "description": "A powerful, extensible code formatter library for multiple languages with a clean API interface",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "neatify": "dist/cli.js",
+    "neat": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "npm run build:wasm && tsc",
+    "build:wasm": "cd .. && node -e \"const os = require('os'); const { execSync } = require('child_process'); const isWindows = os.platform() === 'win32'; const script = isWindows ? 'powershell -ExecutionPolicy Bypass -File ./build-wasm.ps1' : 'bash ./build-wasm.sh'; execSync(script, { stdio: 'inherit', cwd: process.cwd() });\"",
+    "prepublishOnly": "npm run build",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "formatter",
+    "code",
+    "javascript",
+    "formatting",
+    "pretty-print",
+    "cli",
+    "neatify"
+  ],
+  "author": "Neatify Contributors",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pacmjs/neatify.git",
+    "directory": "npm"
+  },
+  "homepage": "https://github.com/pacmjs/neatify#readme",
+  "bugs": {
+    "url": "https://github.com/pacmjs/neatify/issues"
+  },
+  "dependencies": {
+    "glob": "^10.3.10",
+    "commander": "^11.1.0",
+    "chalk": "^5.3.0",
+    "ignore": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}

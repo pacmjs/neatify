@@ -6,6 +6,9 @@
 mod core;
 mod formatters;
 
+#[cfg(feature = "wasm")]
+pub mod wasm;
+
 pub use core::formatter::FormattingStats;
 pub use formatters::{format_directory, format_file};
 

@@ -99,6 +99,21 @@ cargo test --verbose
 print_info "Running quality checks..."
 cargo fmt --all -- --check
 
+# Build WebAssembly bindings
+print_info "Building WebAssembly bindings..."
+if ! command -v wasm-pack &> /dev/null; then
+    print_info "Installing wasm-pack..."
+    cargo install wasm-pack
+fi
+
+wasm-pack build --target nodejs --features wasm --out-dir npm/bin
+
+# Build npm package
+print_info "Building npm package..."
+cd npm
+npm run build
+cd ..
+
 # Update version in Cargo.toml
 print_info "Updating Cargo.toml version..."
 sed -i.bak "s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml

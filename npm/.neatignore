@@ -1,0 +1,82 @@
+# Neatify ignore file
+# This file specifies which files and directories should be ignored during formatting
+
+# Binary files
+/bin
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Generated files
+*.generated.js
+*_generated.js
+*.min.js
+*.bundle.js
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# Optional npm cache directory
+.npm
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+.tmp/
+temp/
+
+# Documentation that should not be formatted
+CHANGELOG.md
+LICENSE
+README.md
+
+# Configuration files with specific formatting
+.eslintrc.js
+.prettierrc
+babel.config.js
+webpack.config.js
+
+# Third-party libraries
+libs/
+thirdparty/
+
+# Specific file patterns
+**/*.spec.js
+**/*.test.js
+**/fixtures/**
+**/mocks/**
