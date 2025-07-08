@@ -47,8 +47,23 @@ fi
 print_info "Pulling latest changes..."
 git pull origin main
 
-# Get current version from Cargo.toml
-current_version=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[0].version')
+# Get current version from Cargo.toml [package] section
+current_version=$(awk '
+BEGIN { in_package = 0 }
+/^\[package\]/ { in_package = 1; next }
+/^\[.*\]/ { in_package = 0; next }
+in_package && /^version *= *"([^"]+)"/ { 
+    match($0, /"([^"]+)"/, arr)
+    print arr[1]
+    exit
+}
+' Cargo.toml)
+
+if [ -z "$current_version" ]; then
+    print_error "Could not find version in [package] section of Cargo.toml"
+    exit 1
+fi
+
 print_info "Current version: $current_version"
 
 # Parse version parts
@@ -114,10 +129,18 @@ cd npm
 npm run build
 cd ..
 
-# Update version in Cargo.toml
-print_info "Updating Cargo.toml version..."
-sed -i.bak "s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
-rm Cargo.toml.bak 2>/dev/null || true  # Remove backup file (macOS creates .bak files)
+# Update version in Cargo.toml [package] section
+print_info "Updating Cargo.toml package version..."
+awk -v new_version="$new_version" '
+BEGIN { in_package = 0 }
+/^\[package\]/ { in_package = 1; print; next }
+/^\[.*\]/ { in_package = 0; print; next }
+in_package && /^version *= *"[^"]+"/ { 
+    print "version = \"" new_version "\""
+    next
+}
+{ print }
+' Cargo.toml > Cargo.toml.tmp && mv Cargo.toml.tmp Cargo.toml
 
 # Update Cargo.lock
 print_info "Updating Cargo.lock..."

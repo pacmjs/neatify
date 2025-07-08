@@ -56,11 +56,28 @@ try {
     exit 1
 }
 
-# For Windows, we'll use a simpler approach to get version from Cargo.toml
 $cargoToml = Get-Content "Cargo.toml"
-$versionLine = $cargoToml | Where-Object { $_ -match '^version\s*=\s*"([^"]+)"' }
+$inPackageSection = $false
+$versionLine = $null
+
+foreach ($line in $cargoToml) {
+    if ($line -match '^\[package\]') {
+        $inPackageSection = $true
+        continue
+    }
+    elseif ($line -match '^\[.*\]') {
+        $inPackageSection = $false
+        continue
+    }
+    
+    if ($inPackageSection -and $line -match '^version\s*=\s*"([^"]+)"') {
+        $versionLine = $line
+        break
+    }
+}
+
 if (-not $versionLine) {
-    Write-Error "Could not find version in Cargo.toml"
+    Write-Error "Could not find version in [package] section of Cargo.toml"
     exit 1
 }
 
@@ -141,11 +158,30 @@ if ($LASTEXITCODE -ne 0) {
 }
 Set-Location ..
 
-# Update version in Cargo.toml
-Write-Info "Updating Cargo.toml version..."
-$cargoTomlContent = Get-Content "Cargo.toml" -Raw
-$updatedContent = $cargoTomlContent -replace 'version\s*=\s*"[^"]+"', "version = `"$newVersion`""
-Set-Content "Cargo.toml" $updatedContent
+# Update version in Cargo.toml [package] section
+Write-Info "Updating Cargo.toml package version..."
+$cargoTomlContent = Get-Content "Cargo.toml"
+$updatedLines = @()
+$inPackageSection = $false
+
+foreach ($line in $cargoTomlContent) {
+    if ($line -match '^\[package\]') {
+        $inPackageSection = $true
+        $updatedLines += $line
+    }
+    elseif ($line -match '^\[.*\]') {
+        $inPackageSection = $false
+        $updatedLines += $line
+    }
+    elseif ($inPackageSection -and $line -match '^version\s*=\s*"[^"]+"') {
+        $updatedLines += "version = `"$newVersion`""
+    }
+    else {
+        $updatedLines += $line
+    }
+}
+
+Set-Content "Cargo.toml" $updatedLines
 
 # Update Cargo.lock
 Write-Info "Updating Cargo.lock..."
