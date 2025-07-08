@@ -1,0 +1,19 @@
+[package]
+name = "neatify"
+version = "0.1.0"
+edition = "2021"
+description = "A code formatter library for multiple languages with a clean API interface"
+license = "BSD-3-Clause"
+authors = ["Neatify Contributors", "PACM Core Team"]
+repository = "https://github.com/pacmjs/neatify"
+documentation = "https://docs.rs/neatify"
+readme = "README.md"
+keywords = ["formatter", "code", "javascript", "formatting", "pretty-print"]
+categories = ["development-tools", "command-line-utilities"]
+
+
+[dependencies]
+anyhow = "1.0"
+
+[dev-dependencies]
+tempfile = "3.3"
