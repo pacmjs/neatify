@@ -27,7 +27,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-## [0.1.0] - DD-MM-YYYY
+## [0.1.0] - 09-07-2025
+
+### Added
+- Initial release
+- JavaScript formatting support
+- File and directory formatting API
+- Error handling
+- Documentation
+
+## [0.1.3] - 09-07-2025
 
 ### Added
 - Initial release
